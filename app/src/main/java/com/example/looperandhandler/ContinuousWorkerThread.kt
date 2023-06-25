@@ -10,11 +10,15 @@ class ContinuousWorkerThread(): Thread(){
     private val taskList = ConcurrentLinkedQueue<Runnable>()
      init {
         start()
+         Log.d(TAG, ":onCreate:  "+this.name)
     }
 
     override fun run() {
         while (flag.get()) {
-            taskList.poll()?.run()
+            taskList.poll()?.let{
+                Log.d(TAG, "callContinuousWorkers: taskexists ")
+                it.run()
+            }
         }
         Log.d(TAG, "run: thread terminated")
     }

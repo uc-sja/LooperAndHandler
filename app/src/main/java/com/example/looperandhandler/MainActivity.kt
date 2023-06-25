@@ -6,8 +6,12 @@ import android.util.Log
 import android.widget.TextView
 import java.lang.Thread.sleep
 import com.example.looperandhandler.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 private const val TAG = "MainActivity"
+
 class MainActivity : AppCompatActivity() {
     private var continuousWorkerThread: ContinuousWorkerThread? = null
 
@@ -16,14 +20,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var handler: Handler
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d(TAG, "onCreate: thread name main " + Thread.currentThread().name)
 
         tvHandleMessage = findViewById(R.id.handleMessage)
 
-        handler = object: Handler(Looper.getMainLooper()){
+        handler = object : Handler(Looper.getMainLooper()) {
             override fun handleMessage(msg: Message) {
                 tvHandleMessage.text = msg.obj.toString()
             }
@@ -36,33 +40,31 @@ class MainActivity : AppCompatActivity() {
     private fun callContinuousWorkers() {
         continuousWorkerThread = ContinuousWorkerThread()
         continuousWorkerThread?.addTasks {
-            Runnable {
-                try{
-                    Log.d(TAG, "callContinuousWorkers: 1")
-                    Thread.sleep(2_000)
-                }
-                 catch(e: Exception) {
-                     Log.d(TAG, "callContinuousWorkers: $e")
-
-                 }
-
-                val msg = Message.obtain()
-                msg.obj = "callContinuousWorkers 1"
-                handler.sendMessage(msg)
-            }
-        }?.addTasks {
-            Log.d(TAG, "callContinuousWorkers: 2")
-            Runnable { Thread.sleep(3_000) }
+            sleep(3000)
+            Log.d(TAG, "callContinuousWorkers: 1 " + Thread.currentThread().name)
             val msg = Message.obtain()
-            msg.obj = "callContinuousWorkers 2"
+            msg.obj = "callContinuousWorkers 1"
             handler.sendMessage(msg)
+        }?.addTasks {
+
+            sleep(4000)
+                Log.d(TAG, "callContinuousWorkers: 2 "+ Thread.currentThread().name)
+                val msg = Message.obtain()
+                msg.obj = "callContinuousWorkers 2"
+                handler.sendMessage(msg)
+
+
 
         }?.addTasks {
-            Log.d(TAG, "callContinuousWorkers: 3")
-            Runnable { Thread.sleep(1_000) }
+            sleep(5000)
+
+            Log.d(TAG, "callContinuousWorkers: 3 "+ Thread.currentThread().name)
+
             val msg = Message.obtain()
             msg.obj = "callContinuousWorkers 3"
             handler.sendMessage(msg)
+
+
         }
     }
 
